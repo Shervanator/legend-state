@@ -36,7 +36,7 @@ export function createObservableHook<TArgs extends any[], TRet>(
     const _useReducer = React.useReducer;
 
     return function (...args: TArgs) {
-        const refObs = React.useRef<Observable<TRet>>();
+        const refObs = React.useRef<Observable<TRet> | undefined>(undefined);
 
         // First override the built-in hooks to create/update observables
         overrideHooks(refObs);

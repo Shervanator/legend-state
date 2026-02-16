@@ -36,7 +36,9 @@ export function For<T, TProps>({
     // The child function gets wrapped in a memoized observer component
     if (!item && children) {
         // Update the ref so the generated component uses the latest function
-        const refChildren = useRef<(value: Observable<T>, id: string | undefined) => ReactElement>();
+        const refChildren = useRef<((value: Observable<T>, id: string | undefined) => ReactElement) | undefined>(
+            undefined,
+        );
         refChildren.current = children;
 
         item = useMemo(() => observer(({ item$, id }) => refChildren.current!(item$, id)), []);
