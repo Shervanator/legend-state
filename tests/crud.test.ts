@@ -1741,6 +1741,33 @@ describe('lastSync', () => {
             updatedAt: 2,
         });
     });
+    test('ignores null rows when computing lastSync', async () => {
+        const persistName = getPersistName();
+        localStorage.setItem(persistName, JSON.stringify({ id2: { id: 'id2', test: 'hi2', updatedAt: 1 } }));
+        localStorage.setItem(persistName + '__m', JSON.stringify({ lastSync: 1000 }));
+
+        const obs$ = observable<Record<string, BasicValue>>(
+            syncedCrud({
+                list: () => promiseTimeout(0, [null as any, { ...ItemBasicValue(), updatedAt: 2 }] as BasicValue[]),
+                as: 'object',
+                fieldUpdatedAt: 'updatedAt',
+                changesSince: 'last-sync',
+                persist: {
+                    name: persistName,
+                    plugin: ObservablePersistLocalStorage,
+                },
+            }),
+        );
+
+        expect(obs$.get()).toEqual({ id2: { id: 'id2', test: 'hi2', updatedAt: 1 } });
+
+        await promiseTimeout(1);
+
+        expect(obs$.get()).toEqual({
+            id1: { id: 'id1', test: 'hi', updatedAt: 2 },
+            id2: { id: 'id2', test: 'hi2', updatedAt: 1 },
+        });
+    });
     test('as first leaves existing if lastSync and returning []', async () => {
         const persistName = getPersistName();
         localStorage.setItem(persistName, JSON.stringify({ id: 'id2', test: 'hi2', updatedAt: 1 }));

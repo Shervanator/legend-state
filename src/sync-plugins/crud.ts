@@ -125,14 +125,30 @@ function ensureId(obj: any, fieldId: string, generateId: () => string | number, 
     }
 }
 
-function computeLastSync(data: any[], fieldUpdatedAt: string | undefined, fieldCreatedAt: string | undefined) {
+function computeLastSync(
+    data: any[] | null | undefined,
+    fieldUpdatedAt: string | undefined,
+    fieldCreatedAt: string | undefined,
+) {
+    if (!isArray(data) || data.length === 0) {
+        return 0;
+    }
+
     let newLastSync = 0;
     for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        if (!row || typeof row !== 'object') {
+            continue;
+        }
+
         const updated =
-            (fieldUpdatedAt ? (data[i] as any)[fieldUpdatedAt as any] : 0) ||
-            (fieldCreatedAt ? (data[i] as any)[fieldCreatedAt as any] : 0);
+            (fieldUpdatedAt ? (row as any)[fieldUpdatedAt as any] : 0) ||
+            (fieldCreatedAt ? (row as any)[fieldCreatedAt as any] : 0);
         if (updated) {
-            newLastSync = Math.max(newLastSync, +new Date(updated));
+            const updatedTime = +new Date(updated);
+            if (!Number.isNaN(updatedTime)) {
+                newLastSync = Math.max(newLastSync, updatedTime);
+            }
         }
     }
     return newLastSync;
