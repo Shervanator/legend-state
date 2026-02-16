@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 import type { Observable } from '@legendapp/state';
 import { FCReactive, FCReactiveObject, configureReactive, useSelector } from '@legendapp/state/react';
 import {

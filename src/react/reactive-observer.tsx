@@ -2,7 +2,7 @@ import * as React from 'react';
 import { isFunction, isObservable, Selector } from '@legendapp/state';
 import { ChangeEvent, ComponentClass, FC, forwardRef, memo, useCallback } from 'react';
 import { reactGlobals } from './react-globals';
-import type { BindKeys } from './reactInterfaces';
+import type { BindKeys, KeysOfUnion } from './reactInterfaces';
 import { useSelector } from './useSelector';
 
 type WithSelectorChildren<T> = T extends any
@@ -21,8 +21,10 @@ export type ObjectShapeWith$<T> = {
     [K in keyof T]: T[K] extends FC<infer P> ? FC<ShapeWith$<P>> : T[K];
 };
 
-export type ReactifyProps<T, K extends keyof T> = T & {
-    [P in K as `$${string & P}`]?: Selector<T[P]>;
+type ValueOfUnionKey<T, K extends PropertyKey> = T extends any ? (K extends keyof T ? T[K] : never) : never;
+
+export type ReactifyProps<T, K extends KeysOfUnion<T>> = T & {
+    [P in K as `$${string & P}`]?: Selector<ValueOfUnionKey<T, P>>;
 };
 
 // Extracting the forwardRef inspired by https://github.com/mobxjs/mobx/blob/main/packages/mobx-react-lite/src/observer.ts
@@ -199,14 +201,14 @@ export function reactive<T extends object>(
     bindKeys?: BindKeys<T>,
 ): React.ForwardRefExoticComponent<ShapeWith$<T>>;
 // With keys
-export function reactive<T extends object, K extends keyof T>(
+export function reactive<T extends object, K extends KeysOfUnion<T>>(
     component: React.FC<T>,
-    keys: K[] | (keyof T)[],
+    keys: K[] | KeysOfUnion<T>[],
     bindKeys?: BindKeys<T, K>,
 ): React.FC<ReactifyProps<T, K>>;
-export function reactive<T extends object, K extends keyof T>(
+export function reactive<T extends object, K extends KeysOfUnion<T>>(
     component: React.ForwardRefExoticComponent<T>,
-    keys: K[] | (keyof T)[],
+    keys: K[] | KeysOfUnion<T>[],
     bindKeys?: BindKeys<T, K>,
 ): React.ForwardRefExoticComponent<ReactifyProps<T, K>>;
 // Without keys
@@ -216,7 +218,7 @@ export function reactive<T extends object>(
     component: React.ForwardRefExoticComponent<T>,
 ): React.ForwardRefExoticComponent<ShapeWith$<T>>;
 // Implementation
-export function reactive<T extends object, K extends keyof T>(
+export function reactive<T extends object, K extends KeysOfUnion<T>>(
     component: React.FC<T> | React.ForwardRefExoticComponent<T> | React.ComponentClass<T>,
     keys?: K[] | undefined | null,
     bindKeys?: BindKeys<T, K>,
@@ -236,14 +238,14 @@ export function reactiveObserver<T extends object>(
     bindKeys?: BindKeys<T>,
 ): React.ForwardRefExoticComponent<ShapeWith$<T>>;
 // With keys
-export function reactiveObserver<T extends object, K extends keyof T>(
+export function reactiveObserver<T extends object, K extends KeysOfUnion<T>>(
     component: React.FC<T>,
-    keys: K[] | (keyof T)[],
+    keys: K[] | KeysOfUnion<T>[],
     bindKeys?: BindKeys<T, K>,
 ): React.FC<ReactifyProps<T, K>>;
-export function reactiveObserver<T extends object, K extends keyof T>(
+export function reactiveObserver<T extends object, K extends KeysOfUnion<T>>(
     component: React.ForwardRefExoticComponent<T>,
-    keys: K[] | (keyof T)[],
+    keys: K[] | KeysOfUnion<T>[],
     bindKeys?: BindKeys<T, K>,
 ): React.ForwardRefExoticComponent<ReactifyProps<T, K>>;
 // Without keys
@@ -252,7 +254,7 @@ export function reactiveObserver<T extends object>(
     component: React.ForwardRefExoticComponent<T>,
 ): React.ForwardRefExoticComponent<ShapeWith$<T>>;
 // Implementation
-export function reactiveObserver<T extends object, K extends keyof T>(
+export function reactiveObserver<T extends object, K extends KeysOfUnion<T>>(
     component: React.FC<T> | React.ForwardRefExoticComponent<T>,
     keys?: K[] | undefined | null,
     bindKeys?: BindKeys<T, K>,

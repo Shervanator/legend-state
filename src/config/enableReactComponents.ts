@@ -1,4 +1,5 @@
 import { BindKeys, FCReactiveObject, configureReactive } from '@legendapp/state/react';
+import type { JSX } from 'react';
 
 // TODOV3 Remove this
 

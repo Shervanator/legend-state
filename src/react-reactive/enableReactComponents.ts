@@ -1,4 +1,5 @@
 import { BindKeys, configureReactive } from '@legendapp/state/react';
+import type { JSX } from 'react';
 
 let isEnabled = false;
 

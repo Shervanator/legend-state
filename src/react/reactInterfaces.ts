@@ -1,13 +1,16 @@
 import type { GetOptions, Observable, Selector } from '@legendapp/state';
 import type { FC, LegacyRef, ReactNode } from 'react';
 
+export type KeysOfUnion<T> = T extends T ? keyof T : never;
+type ValueOfUnionKey<P, K extends PropertyKey> = P extends any ? (K extends keyof P ? P[K] : never) : never;
+
 export type ShapeWithNew$<T> = Partial<Omit<T, 'children'>> & {
     [K in keyof T as K extends `$${string & K}` ? K : `$${string & K}`]?: Selector<T[K]>;
 } & { children?: Selector<ReactNode> };
 
-export interface BindKey<P, K extends keyof P = keyof P> {
+export interface BindKey<P, K extends KeysOfUnion<P> = KeysOfUnion<P>> {
     handler?: K;
-    getValue?: P[K] extends infer T
+    getValue?: ValueOfUnionKey<P, K> extends infer T
         ? T extends (...args: any) => any
             ? (params: Parameters<T>[0]) => any
             : (e: any) => any
@@ -16,7 +19,7 @@ export interface BindKey<P, K extends keyof P = keyof P> {
     selector?: (propsOut: Record<string, any>, p: Observable<any>) => any;
 }
 
-export type BindKeys<P = any, K extends keyof P = keyof P> = Partial<Record<K, BindKey<P>>>;
+export type BindKeys<P = any, K extends KeysOfUnion<P> = KeysOfUnion<P>> = Partial<Record<K, BindKey<P, K>>>;
 
 export type FCReactiveObject<T> = {
     [K in keyof T]: FC<ShapeWithNew$<T[K]>>;
