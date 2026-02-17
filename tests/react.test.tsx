@@ -2045,7 +2045,6 @@ describe('useObservable', () => {
                         numSubscribes++;
                         return () => {
                             numUnsubscribes++;
-                            console.log('unsubscribed');
                         };
                     },
                 }),
